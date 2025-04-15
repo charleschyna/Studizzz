@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,8 @@ const AuthPage: React.FC = () => {
   const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const [searchParams] = useSearchParams();
+  const role = searchParams.get('role') || 'parent';
   
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -24,6 +26,17 @@ const AuthPage: React.FC = () => {
   const [signupFullName, setSignupFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getRoleTitle = () => {
+    switch (role) {
+      case 'admin':
+        return 'Administrator';
+      case 'teacher':
+        return 'Teacher';
+      default:
+        return 'Parent';
+    }
+  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,7 +51,7 @@ const AuthPage: React.FC = () => {
         return;
       }
       
-      navigate('/');
+      navigate('/dashboard');
     } catch (err) {
       setError('An unexpected error occurred');
       console.error(err);
@@ -59,7 +72,7 @@ const AuthPage: React.FC = () => {
     setError(null);
     
     try {
-      const { error } = await signUp(signupEmail, signupPassword, signupFullName);
+      const { error } = await signUp(signupEmail, signupPassword, signupFullName, role);
       
       if (error) {
         setError(error.message);
@@ -86,7 +99,7 @@ const AuthPage: React.FC = () => {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-primary">Student Performance Tracking System</h1>
-          <p className="text-gray-600 mt-2">Kenyan High School</p>
+          <p className="text-gray-600 mt-2">{getRoleTitle()} Portal</p>
         </div>
         
         <Tabs defaultValue="login" className="w-full">
@@ -99,7 +112,7 @@ const AuthPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Login to your account</CardTitle>
-                <CardDescription>Enter your credentials to access the system</CardDescription>
+                <CardDescription>Enter your credentials to access the {getRoleTitle()} portal</CardDescription>
               </CardHeader>
               
               <form onSubmit={handleLogin}>
@@ -148,7 +161,7 @@ const AuthPage: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Create an account</CardTitle>
-                <CardDescription>Enter your details to create a new account</CardDescription>
+                <CardDescription>Sign up as a new {getRoleTitle()}</CardDescription>
               </CardHeader>
               
               <form onSubmit={handleSignup}>
@@ -215,6 +228,12 @@ const AuthPage: React.FC = () => {
             </Card>
           </TabsContent>
         </Tabs>
+
+        <div className="mt-4 text-center">
+          <Button variant="link" onClick={() => navigate('/')}>
+            Back to Home
+          </Button>
+        </div>
       </div>
     </div>
   );

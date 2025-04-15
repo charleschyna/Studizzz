@@ -12,6 +12,12 @@ import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
+import Performance from "./pages/parent/Performance";
+import Attendance from "./pages/parent/Attendance";
+import ReportCards from "./pages/parent/ReportCards";
+import Notifications from "./pages/parent/Notifications";
+import StudentProfile from "./pages/parent/StudentProfile";
+import Settings from "./pages/parent/Settings";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -37,6 +43,55 @@ const App = () => {
                   <ProtectedRoute>
                     <MainLayout>
                       <Dashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Parent Dashboard Routes */}
+                <Route path="/performance" element={
+                  <ProtectedRoute allowedRoles={['parent', 'admin']}>
+                    <MainLayout>
+                      <Performance />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/attendance" element={
+                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
+                    <MainLayout>
+                      <Attendance />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/report-cards" element={
+                  <ProtectedRoute allowedRoles={['parent', 'admin']}>
+                    <MainLayout>
+                      <ReportCards />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/notifications" element={
+                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
+                    <MainLayout>
+                      <Notifications />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/student-profile" element={
+                  <ProtectedRoute allowedRoles={['parent', 'admin']}>
+                    <MainLayout>
+                      <StudentProfile />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
+                    <MainLayout>
+                      <Settings />
                     </MainLayout>
                   </ProtectedRoute>
                 } />

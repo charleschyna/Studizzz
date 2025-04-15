@@ -11,7 +11,9 @@ import {
   Settings, 
   Users, 
   BookOpenCheck, 
-  GraduationCap
+  GraduationCap,
+  User,
+  Bell
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -20,7 +22,7 @@ const Sidebar: React.FC = () => {
   // Define routes based on user role
   const getRoutes = () => {
     const routes = [
-      { name: 'Dashboard', path: '/', icon: <Home className="h-5 w-5" />, allowedRoles: ['admin', 'teacher', 'parent'] },
+      { name: 'Dashboard', path: '/dashboard', icon: <Home className="h-5 w-5" />, allowedRoles: ['admin', 'teacher', 'parent'] },
     ];
     
     if (userRole === 'admin') {
@@ -45,10 +47,12 @@ const Sidebar: React.FC = () => {
     
     if (userRole === 'parent') {
       routes.push(
-        { name: 'My Children', path: '/my-children', icon: <GraduationCap className="h-5 w-5" />, allowedRoles: ['parent'] },
+        { name: 'Performance', path: '/performance', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['parent'] },
         { name: 'Attendance', path: '/attendance', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['parent'] },
-        { name: 'Grades', path: '/grades', icon: <FileText className="h-5 w-5" />, allowedRoles: ['parent'] },
-        { name: 'Reports', path: '/reports', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['parent'] }
+        { name: 'Report Cards', path: '/report-cards', icon: <FileText className="h-5 w-5" />, allowedRoles: ['parent'] },
+        { name: 'Notifications', path: '/notifications', icon: <Bell className="h-5 w-5" />, allowedRoles: ['parent'] },
+        { name: 'Student Profile', path: '/student-profile', icon: <User className="h-5 w-5" />, allowedRoles: ['parent'] },
+        { name: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, allowedRoles: ['parent'] }
       );
     }
     

@@ -12,7 +12,7 @@ const Notifications: React.FC = () => {
       id: '1',
       type: 'alert',
       title: 'Low Performance Alert',
-      message: 'John's performance in Chemistry has dropped below average. Please schedule a meeting with the teacher.',
+      message: "John's performance in Chemistry has dropped below average. Please schedule a meeting with the teacher.",
       date: '2025-05-15T14:30:00',
       isRead: false,
       isImportant: true

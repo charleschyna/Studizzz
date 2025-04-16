@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,12 +31,12 @@ const Sidebar: React.FC = () => {
   // Define routes based on user role
   const getRoutes = () => {
     const routes = [
-      { name: 'Dashboard', path: '/dashboard', icon: <Home className="h-5 w-5" />, allowedRoles: ['admin', 'teacher', 'parent'] },
+      // Removed the duplicate 'Dashboard' route
     ];
     
     if (userRole === 'admin') {
       routes.push(
-        { name: 'Admin Dashboard', path: '/admin-dashboard', icon: <Home className="h-5 w-5" />, allowedRoles: ['admin'] },
+        // Removing the 'Admin Dashboard' route as it's redundant
         { name: 'Manage Students', path: '/manage-students', icon: <GraduationCap className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Manage Teachers', path: '/manage-teachers', icon: <UserPlus className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Manage Parents', path: '/manage-parents', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },

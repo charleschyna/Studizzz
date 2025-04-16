@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -94,6 +93,8 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  const showSignup = role === 'parent';
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
       <div className="w-full max-w-md">
@@ -102,132 +103,181 @@ const AuthPage: React.FC = () => {
           <p className="text-gray-600 mt-2">{getRoleTitle()} Portal</p>
         </div>
         
-        <Tabs defaultValue="login" className="w-full">
-          <TabsList className="grid grid-cols-2 w-full">
-            <TabsTrigger id="login-tab" value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="login">
-            <Card>
-              <CardHeader>
-                <CardTitle>Login to your account</CardTitle>
-                <CardDescription>Enter your credentials to access the {getRoleTitle()} portal</CardDescription>
-              </CardHeader>
-              
-              <form onSubmit={handleLogin}>
-                <CardContent className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email" 
-                      type="email" 
-                      placeholder="you@example.com" 
-                      value={loginEmail}
-                      onChange={(e) => setLoginEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input 
-                      id="password" 
-                      type="password" 
-                      value={loginPassword}
-                      onChange={(e) => setLoginPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
+        {showSignup ? (
+          <Tabs defaultValue="login" className="w-full">
+            <TabsList className="grid grid-cols-2 w-full">
+              <TabsTrigger id="login-tab" value="login">Login</TabsTrigger>
+              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="login">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Login to your account</CardTitle>
+                  <CardDescription>Enter your credentials to access the {getRoleTitle()} portal</CardDescription>
+                </CardHeader>
                 
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Logging in...' : 'Login'}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-          
-          <TabsContent value="signup">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create an account</CardTitle>
-                <CardDescription>Sign up as a new {getRoleTitle()}</CardDescription>
-              </CardHeader>
-              
-              <form onSubmit={handleSignup}>
-                <CardContent className="space-y-4">
-                  {error && (
-                    <Alert variant="destructive">
-                      <AlertCircle className="h-4 w-4" />
-                      <AlertDescription>{error}</AlertDescription>
-                    </Alert>
-                  )}
+                <form onSubmit={handleLogin}>
+                  <CardContent className="space-y-4">
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        placeholder="you@example.com" 
+                        value={loginEmail}
+                        onChange={(e) => setLoginEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="password">Password</Label>
+                      <Input 
+                        id="password" 
+                        type="password" 
+                        value={loginPassword}
+                        onChange={(e) => setLoginPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </CardContent>
                   
-                  <div className="space-y-2">
-                    <Label htmlFor="full-name">Full Name</Label>
-                    <Input 
-                      id="full-name" 
-                      placeholder="John Doe" 
-                      value={signupFullName}
-                      onChange={(e) => setSignupFullName(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input 
-                      id="signup-email" 
-                      type="email" 
-                      placeholder="you@example.com" 
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input 
-                      id="signup-password" 
-                      type="password" 
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input 
-                      id="confirm-password" 
-                      type="password" 
-                      value={signupConfirmPassword}
-                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
+                  <CardFooter>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'Logging in...' : 'Login'}
+                    </Button>
+                  </CardFooter>
+                </form>
+              </Card>
+            </TabsContent>
+            
+            <TabsContent value="signup">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Create an account</CardTitle>
+                  <CardDescription>Sign up as a new {getRoleTitle()}</CardDescription>
+                </CardHeader>
                 
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'Creating account...' : 'Sign Up'}
-                  </Button>
-                </CardFooter>
-              </form>
-            </Card>
-          </TabsContent>
-        </Tabs>
+                <form onSubmit={handleSignup}>
+                  <CardContent className="space-y-4">
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="full-name">Full Name</Label>
+                      <Input 
+                        id="full-name" 
+                        placeholder="John Doe" 
+                        value={signupFullName}
+                        onChange={(e) => setSignupFullName(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-email">Email</Label>
+                      <Input 
+                        id="signup-email" 
+                        type="email" 
+                        placeholder="you@example.com" 
+                        value={signupEmail}
+                        onChange={(e) => setSignupEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="signup-password">Password</Label>
+                      <Input 
+                        id="signup-password" 
+                        type="password" 
+                        value={signupPassword}
+                        onChange={(e) => setSignupPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="confirm-password">Confirm Password</Label>
+                      <Input 
+                        id="confirm-password" 
+                        type="password" 
+                        value={signupConfirmPassword}
+                        onChange={(e) => setSignupConfirmPassword(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'Creating account...' : 'Sign Up'}
+                    </Button>
+                  </CardFooter>
+                </form>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Login to your account</CardTitle>
+              <CardDescription>Enter your credentials to access the {getRoleTitle()} portal</CardDescription>
+            </CardHeader>
+            
+            <form onSubmit={handleLogin}>
+              <CardContent className="space-y-4">
+                {error && (
+                  <Alert variant="destructive">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertDescription>{error}</AlertDescription>
+                  </Alert>
+                )}
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="you@example.com" 
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    required
+                  />
+                </div>
+              </CardContent>
+              
+              <CardFooter>
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                  {isLoading ? 'Logging in...' : 'Login'}
+                </Button>
+              </CardFooter>
+            </form>
+          </Card>
+        )}
 
         <div className="mt-4 text-center">
           <Button variant="link" onClick={() => navigate('/')}>

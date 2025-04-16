@@ -1,7 +1,15 @@
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpen, CalendarCheck, GraduationCap, Users, Bell, Calendar, AlertTriangle } from 'lucide-react';
+import { 
+  BookOpen, 
+  CalendarCheck, 
+  GraduationCap, 
+  Users, 
+  Bell, 
+  Calendar, 
+  AlertTriangle 
+} from 'lucide-react';
 import TeacherDashboard from './teacher/TeacherDashboard';
 import AdminDashboard from './admin/AdminDashboard';
 
@@ -115,84 +123,6 @@ const ParentDashboard: React.FC = () => {
               <ActivityItem
                 title="School Sports Day"
                 timestamp="Next Week"
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
-};
-
-const AdminDashboard: React.FC = () => {
-  return (
-    <>
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">School system overview and management.</p>
-      </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <DashboardCard
-          title="Students"
-          value="520"
-          description="Total students"
-          icon={<GraduationCap className="h-5 w-5 text-primary" />}
-        />
-        <DashboardCard
-          title="Teachers"
-          value="38"
-          description="Faculty members"
-          icon={<Users className="h-5 w-5 text-primary" />}
-        />
-        <DashboardCard
-          title="Subjects"
-          value="12"
-          description="Active subjects"
-          icon={<BookOpen className="h-5 w-5 text-primary" />}
-        />
-        <DashboardCard
-          title="Attendance"
-          value="95%"
-          description="Average attendance"
-          icon={<CalendarCheck className="h-5 w-5 text-primary" />}
-        />
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Performance Summary</CardTitle>
-            <CardDescription>Average grades per class</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="h-60 flex items-center justify-center text-muted-foreground">
-              Chart will be displayed here
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activities</CardTitle>
-            <CardDescription>Latest system updates</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <ActivityItem
-                title="Term 2 Grades Published"
-                timestamp="2 hours ago"
-              />
-              <ActivityItem
-                title="Form 3 Attendance Updated"
-                timestamp="Yesterday"
-              />
-              <ActivityItem
-                title="New Student Registered"
-                timestamp="3 days ago"
-              />
-              <ActivityItem
-                title="Subject Schedule Updated"
-                timestamp="1 week ago"
               />
             </div>
           </CardContent>

@@ -1,20 +1,17 @@
-
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, CalendarCheck, GraduationCap, Users, Bell, Calendar, AlertTriangle } from 'lucide-react';
+import TeacherDashboard from './teacher/TeacherDashboard';
 
 const Dashboard: React.FC = () => {
   const { userRole } = useAuth();
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-        <p className="text-muted-foreground">Welcome to your {userRole} dashboard.</p>
-      </div>
-
-      {userRole === 'parent' ? (
+      {userRole === 'teacher' ? (
+        <TeacherDashboard />
+      ) : userRole === 'parent' ? (
         <ParentDashboard />
       ) : (
         <AdminTeacherDashboard />
@@ -26,6 +23,10 @@ const Dashboard: React.FC = () => {
 const ParentDashboard: React.FC = () => {
   return (
     <>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Parent Dashboard</h1>
+        <p className="text-muted-foreground">Monitor your child's academic progress.</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <DashboardCard
           title="Latest Grades"
@@ -120,6 +121,10 @@ const ParentDashboard: React.FC = () => {
 const AdminTeacherDashboard: React.FC = () => {
   return (
     <>
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+        <p className="text-muted-foreground">School system overview and management.</p>
+      </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <DashboardCard
           title="Students"

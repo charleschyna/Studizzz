@@ -13,7 +13,10 @@ import {
   BookOpenCheck, 
   GraduationCap,
   User,
-  Bell
+  Bell,
+  MessageSquare,
+  Check,
+  Upload
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -39,9 +42,13 @@ const Sidebar: React.FC = () => {
     
     if (userRole === 'teacher') {
       routes.push(
-        { name: 'Attendance', path: '/attendance', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['admin', 'teacher'] },
-        { name: 'Grades', path: '/grades', icon: <FileText className="h-5 w-5" />, allowedRoles: ['admin', 'teacher'] },
-        { name: 'Reports', path: '/reports', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['admin', 'teacher'] }
+        { name: 'Class Management', path: '/class-management', icon: <BookOpen className="h-5 w-5" />, allowedRoles: ['teacher'] },
+        { name: 'Grade Entry', path: '/grade-entry', icon: <FileText className="h-5 w-5" />, allowedRoles: ['teacher'] },
+        { name: 'Attendance', path: '/attendance', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['teacher'] },
+        { name: 'Performance Analytics', path: '/performance-analytics', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['teacher'] },
+        { name: 'Student Profiles', path: '/student-profiles', icon: <User className="h-5 w-5" />, allowedRoles: ['teacher'] },
+        { name: 'Messages', path: '/messages', icon: <MessageSquare className="h-5 w-5" />, allowedRoles: ['teacher'] },
+        { name: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, allowedRoles: ['teacher'] }
       );
     }
     

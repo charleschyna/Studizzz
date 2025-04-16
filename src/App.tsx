@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -22,7 +21,9 @@ import Settings from "./pages/parent/Settings";
 // Teacher pages
 import ClassManagement from "./pages/teacher/ClassManagement";
 import GradeEntry from "./pages/teacher/GradeEntry";
-// Import other teacher pages as they are created
+
+// Admin pages
+import ManageTeachers from "./pages/admin/ManageTeachers";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -114,6 +115,15 @@ const App = () => {
                   <ProtectedRoute allowedRoles={['teacher', 'admin']}>
                     <MainLayout>
                       <GradeEntry />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                {/* Admin Dashboard Routes */}
+                <Route path="/manage-teachers" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <ManageTeachers />
                     </MainLayout>
                   </ProtectedRoute>
                 } />

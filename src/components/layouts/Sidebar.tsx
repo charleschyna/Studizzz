@@ -16,7 +16,8 @@ import {
   Bell,
   MessageSquare,
   Check,
-  Upload
+  Upload,
+  UserPlus
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -32,6 +33,7 @@ const Sidebar: React.FC = () => {
       routes.push(
         { name: 'Students', path: '/students', icon: <GraduationCap className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Teachers', path: '/teachers', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Manage Teachers', path: '/manage-teachers', icon: <UserPlus className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Parents', path: '/parents', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Classes', path: '/classes', icon: <BookOpen className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Subjects', path: '/subjects', icon: <BookOpenCheck className="h-5 w-5" />, allowedRoles: ['admin'] },

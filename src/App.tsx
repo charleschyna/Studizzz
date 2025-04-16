@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -24,6 +25,7 @@ import GradeEntry from "./pages/teacher/GradeEntry";
 
 // Admin pages
 import ManageTeachers from "./pages/admin/ManageTeachers";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -124,6 +126,86 @@ const App = () => {
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
                       <ManageTeachers />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/admin-dashboard" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <AdminDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/manage-students" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Students Management (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/manage-parents" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Parents Management (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/manage-classes" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Classes & Subjects Management (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/academic-records" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Academic Records Overview (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/admin-attendance" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Attendance Records (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/analytics" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Analytics & Reports (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/system-settings" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">System Settings (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/activity-logs" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Activity Logs (Coming Soon)</div>
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/account-settings" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <div className="p-4">Account Settings (Coming Soon)</div>
                     </MainLayout>
                   </ProtectedRoute>
                 } />

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
@@ -93,6 +94,7 @@ const AuthPage: React.FC = () => {
     }
   };
 
+  // Only allow parents to sign up directly. Teachers and admins must be created by an admin.
   const showSignup = role === 'parent';
 
   return (
@@ -234,7 +236,14 @@ const AuthPage: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle>Login to your account</CardTitle>
-              <CardDescription>Enter your credentials to access the {getRoleTitle()} portal</CardDescription>
+              <CardDescription>
+                Enter your credentials to access the {getRoleTitle()} portal
+                {role !== 'parent' && (
+                  <p className="mt-1 text-xs text-amber-600">
+                    {role === 'admin' ? 'Administrator' : 'Teacher'} accounts can only be created by system administrators.
+                  </p>
+                )}
+              </CardDescription>
             </CardHeader>
             
             <form onSubmit={handleLogin}>

@@ -17,7 +17,13 @@ import {
   MessageSquare,
   Check,
   Upload,
-  UserPlus
+  UserPlus,
+  School,
+  AlertTriangle,
+  Activity,
+  ClipboardList,
+  Wrench,
+  LogIn
 } from 'lucide-react';
 
 const Sidebar: React.FC = () => {
@@ -31,14 +37,17 @@ const Sidebar: React.FC = () => {
     
     if (userRole === 'admin') {
       routes.push(
-        { name: 'Students', path: '/students', icon: <GraduationCap className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Teachers', path: '/teachers', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Admin Dashboard', path: '/admin-dashboard', icon: <Home className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Manage Students', path: '/manage-students', icon: <GraduationCap className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Manage Teachers', path: '/manage-teachers', icon: <UserPlus className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Parents', path: '/parents', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Classes', path: '/classes', icon: <BookOpen className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Subjects', path: '/subjects', icon: <BookOpenCheck className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Terms', path: '/terms', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, allowedRoles: ['admin'] }
+        { name: 'Manage Parents', path: '/manage-parents', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Classes & Subjects', path: '/manage-classes', icon: <ClipboardList className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Academic Records', path: '/academic-records', icon: <FileText className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Attendance Records', path: '/admin-attendance', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Analytics & Reports', path: '/analytics', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'System Settings', path: '/system-settings', icon: <Wrench className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Activity Logs', path: '/activity-logs', icon: <Activity className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Account Settings', path: '/account-settings', icon: <LogIn className="h-5 w-5" />, allowedRoles: ['admin'] }
       );
     }
     

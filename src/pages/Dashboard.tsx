@@ -3,18 +3,24 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpen, CalendarCheck, GraduationCap, Users, Bell, Calendar, AlertTriangle } from 'lucide-react';
 import TeacherDashboard from './teacher/TeacherDashboard';
+import AdminDashboard from './admin/AdminDashboard';
 
 const Dashboard: React.FC = () => {
   const { userRole } = useAuth();
 
   return (
     <div className="space-y-6">
-      {userRole === 'teacher' ? (
+      {userRole === 'admin' ? (
+        <AdminDashboard />
+      ) : userRole === 'teacher' ? (
         <TeacherDashboard />
       ) : userRole === 'parent' ? (
         <ParentDashboard />
       ) : (
-        <AdminTeacherDashboard />
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Welcome</h1>
+          <p className="text-muted-foreground">Please contact an administrator if you're having trouble accessing your dashboard.</p>
+        </div>
       )}
     </div>
   );
@@ -118,7 +124,7 @@ const ParentDashboard: React.FC = () => {
   );
 };
 
-const AdminTeacherDashboard: React.FC = () => {
+const AdminDashboard: React.FC = () => {
   return (
     <>
       <div>

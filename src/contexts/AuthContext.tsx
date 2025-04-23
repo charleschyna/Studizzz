@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
+import { logLogin } from '@/utils/activityLogger';
 
 type UserProfile = Database['public']['Tables']['profiles']['Row'];
 type UserRole = Database['public']['Enums']['user_role'];
@@ -80,7 +81,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signIn = async (email: string, password: string) => {
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      
+      // Log the login activity if successful
+      if (!error && data.user) {
+        try {
+          await logLogin(data.user.id, email);
+        } catch (logError) {
+          console.error('Failed to log login activity:', logError);
+          // Don't block authentication if logging fails
+        }
+      }
+      
       return { error };
     } catch (error) {
       return { error };

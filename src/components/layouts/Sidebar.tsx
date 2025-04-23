@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { cn } from '@/lib/utils';
 import { 
   BarChart, 
   BookOpen, 
@@ -22,27 +23,31 @@ import {
   Activity,
   ClipboardList,
   Wrench,
-  LogIn
+  LogIn,
+  Wallet
 } from 'lucide-react';
 
-const Sidebar: React.FC = () => {
+interface SidebarProps {
+  isOpen: boolean;
+}
+
+const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
   const { userRole } = useAuth();
 
   // Define routes based on user role
   const getRoutes = () => {
-    const routes = [
-      // Removed the duplicate 'Dashboard' route
-    ];
+    const routes = [];
     
     if (userRole === 'admin') {
       routes.push(
-        // Removing the 'Admin Dashboard' route as it's redundant
+        { name: 'Dashboard', path: '/dashboard', icon: <Home className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Manage Students', path: '/manage-students', icon: <GraduationCap className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Manage Teachers', path: '/manage-teachers', icon: <UserPlus className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Manage Parents', path: '/manage-parents', icon: <Users className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Classes & Subjects', path: '/manage-classes', icon: <ClipboardList className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Fees & Payments', path: '/fees-management', icon: <Wallet className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Academic Records', path: '/academic-records', icon: <FileText className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Attendance Records', path: '/admin-attendance', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Attendance Records', path: '/attendance-records', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Analytics & Reports', path: '/analytics', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'System Settings', path: '/system-settings', icon: <Wrench className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Activity Logs', path: '/activity-logs', icon: <Activity className="h-5 w-5" />, allowedRoles: ['admin'] },
@@ -67,6 +72,7 @@ const Sidebar: React.FC = () => {
         { name: 'Performance', path: '/performance', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['parent'] },
         { name: 'Attendance', path: '/attendance', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['parent'] },
         { name: 'Report Cards', path: '/report-cards', icon: <FileText className="h-5 w-5" />, allowedRoles: ['parent'] },
+        { name: 'School Fees', path: '/student-fees', icon: <Wallet className="h-5 w-5" />, allowedRoles: ['parent'] },
         { name: 'Notifications', path: '/notifications', icon: <Bell className="h-5 w-5" />, allowedRoles: ['parent'] },
         { name: 'Student Profile', path: '/student-profile', icon: <User className="h-5 w-5" />, allowedRoles: ['parent'] },
         { name: 'Settings', path: '/settings', icon: <Settings className="h-5 w-5" />, allowedRoles: ['parent'] }
@@ -77,10 +83,13 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <div className="hidden md:flex flex-col w-64 bg-white shadow-md border-r">
-      <div className="p-6">
-        <h2 className="text-2xl font-bold text-primary">SPTS</h2>
-        <p className="text-sm text-muted-foreground">Student Performance Tracking</p>
+    <div className={cn(
+      "fixed md:relative md:flex flex-col w-64 bg-gradient-to-b from-indigo-800 to-indigo-900 text-white shadow-xl transition-transform duration-300 ease-in-out transform h-full z-50",
+      isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
+    )}>
+      <div className="p-6 border-b border-indigo-700">
+        <h2 className="text-2xl font-bold text-white">SPTS</h2>
+        <p className="text-sm text-indigo-200">Student Performance Tracking</p>
       </div>
       
       <nav className="flex-1 overflow-y-auto">
@@ -92,8 +101,8 @@ const Sidebar: React.FC = () => {
                 className={({ isActive }) => 
                   `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive 
-                      ? 'bg-primary/10 text-primary' 
-                      : 'text-gray-700 hover:bg-gray-100'
+                      ? 'bg-indigo-700/50 text-white' 
+                      : 'text-indigo-100 hover:bg-indigo-700/30 hover:text-white'
                   }`
                 }
               >

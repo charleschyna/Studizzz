@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -18,6 +17,12 @@ import ReportCards from "./pages/parent/ReportCards";
 import Notifications from "./pages/parent/Notifications";
 import StudentProfile from "./pages/parent/StudentProfile";
 import Settings from "./pages/parent/Settings";
+import FeesManagement from '@/pages/admin/FeesManagement';
+import StudentFees from '@/pages/parent/StudentFees';
+import AcademicRecords from '@/pages/admin/AcademicRecords';
+import AttendanceRecords from '@/pages/admin/AttendanceRecords';
+import AnalyticsReports from '@/pages/admin/AnalyticsReports';
+import SystemSettings from '@/pages/admin/SystemSettings';
 
 // Teacher pages
 import ClassManagement from "./pages/teacher/ClassManagement";
@@ -26,6 +31,9 @@ import GradeEntry from "./pages/teacher/GradeEntry";
 // Admin pages
 import ManageTeachers from "./pages/admin/ManageTeachers";
 import AdminDashboard from "./pages/admin/AdminDashboard";
+import ManageStudents from "./pages/admin/ManageStudents";
+import ManageParents from "./pages/admin/ManageParents";
+import ManageClasses from "./pages/admin/ManageClasses";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -104,6 +112,14 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
+                <Route path="/student-fees" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <StudentFees />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
                 {/* Teacher Dashboard Routes */}
                 <Route path="/class-management" element={
                   <ProtectedRoute allowedRoles={['teacher', 'admin']}>
@@ -141,7 +157,7 @@ const App = () => {
                 <Route path="/manage-students" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Students Management (Coming Soon)</div>
+                      <ManageStudents />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
@@ -149,7 +165,7 @@ const App = () => {
                 <Route path="/manage-parents" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Parents Management (Coming Soon)</div>
+                      <ManageParents />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
@@ -157,7 +173,15 @@ const App = () => {
                 <Route path="/manage-classes" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Classes & Subjects Management (Coming Soon)</div>
+                      <ManageClasses />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/fees-management" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <FeesManagement />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
@@ -165,15 +189,15 @@ const App = () => {
                 <Route path="/academic-records" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Academic Records Overview (Coming Soon)</div>
+                      <AcademicRecords />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/admin-attendance" element={
+                <Route path="/attendance-records" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Attendance Records (Coming Soon)</div>
+                      <AttendanceRecords />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
@@ -181,7 +205,7 @@ const App = () => {
                 <Route path="/analytics" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Analytics & Reports (Coming Soon)</div>
+                      <AnalyticsReports />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
@@ -189,7 +213,7 @@ const App = () => {
                 <Route path="/system-settings" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">System Settings (Coming Soon)</div>
+                      <SystemSettings />
                     </MainLayout>
                   </ProtectedRoute>
                 } />

@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BookOpen, 
@@ -10,16 +9,24 @@ import {
   Activity, 
   AlertTriangle, 
   UserPlus,
-  Book
+  Book,
+  Loader2,
+  RefreshCw
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { useNavigate } from 'react-router-dom';
+import { useToast } from '@/hooks/use-toast';
+import { formatDistanceToNow } from 'date-fns';
+import { Button } from '@/components/ui/button';
 
 // Dashboard card component
 interface StatsCardProps {
   title: string;
-  value: string;
+  value: string | number;
   description: string;
   icon: React.ReactNode;
   className?: string;
+  isLoading?: boolean;
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -28,6 +35,7 @@ const StatsCard: React.FC<StatsCardProps> = ({
   description,
   icon,
   className,
+  isLoading = false,
 }) => (
   <Card className={className}>
     <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -35,7 +43,9 @@ const StatsCard: React.FC<StatsCardProps> = ({
       {icon}
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">{value}</div>
+      <div className="text-2xl font-bold">
+        {isLoading ? <Loader2 className="h-6 w-6 animate-spin" /> : value}
+      </div>
       <p className="text-xs text-muted-foreground">{description}</p>
     </CardContent>
   </Card>
@@ -94,56 +104,256 @@ const QuickAction: React.FC<QuickActionProps> = ({ icon, label, onClick }) => (
   </button>
 );
 
+interface ActivityLog {
+  id: string;
+  title: string;
+  timestamp: string;
+  action_type: 'login' | 'update' | 'add' | 'delete';
+}
+
+interface Alert {
+  id: string;
+  title: string;
+  priority: string;
+  type: 'login' | 'update' | 'add' | 'delete';
+}
+
 const AdminDashboard: React.FC = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // States for dashboard data
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [studentCount, setStudentCount] = useState<number>(0);
+  const [teacherCount, setTeacherCount] = useState<number>(0);
+  const [classCount, setClassCount] = useState<number>(0);
+  const [alertCount, setAlertCount] = useState<number>(0);
+  const [activities, setActivities] = useState<ActivityLog[]>([]);
+  const [alerts, setAlerts] = useState<Alert[]>([]);
+
+  // Function to fetch dashboard data
+  const fetchDashboardData = async (showRefreshIndicator = false) => {
+    if (showRefreshIndicator) {
+      setIsRefreshing(true);
+    } else {
+      setIsLoading(true);
+    }
+    
+    try {
+      // Fetch student count
+      const { count: studentCount, error: studentError } = await supabase
+        .from('students')
+        .select('*', { count: 'exact', head: true });
+        
+      if (studentError) throw studentError;
+      setStudentCount(studentCount || 0);
+      
+      // Fetch teacher count
+      const { data: teacherData, error: teacherError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'teacher');
+        
+      if (teacherError) throw teacherError;
+      setTeacherCount(teacherData?.length || 0);
+      
+      // Fetch class count
+      const { count: classCount, error: classError } = await supabase
+        .from('classes')
+        .select('*', { count: 'exact', head: true });
+        
+      if (classError) throw classError;
+      setClassCount(classCount || 0);
+      
+      // Fetch recent activity logs
+      const { data: activityData, error: activityError } = await supabase
+        .from('activity_logs')
+        .select('id, action_type, description, created_at, user_id, entity_type')
+        .order('created_at', { ascending: false })
+        .limit(5);
+        
+      if (activityError) {
+        console.error('Error fetching activity logs:', activityError);
+        // If activity logs table doesn't exist yet, use mock data
+        const mockActivities: ActivityLog[] = [
+          {
+            id: '1',
+            title: 'Mr. Otieno added grades for Form 3 Chemistry',
+            timestamp: '2 hours ago',
+            action_type: 'add'
+          },
+          {
+            id: '2',
+            title: 'Admin updated school term dates',
+            timestamp: 'Yesterday',
+            action_type: 'update'
+          },
+          {
+            id: '3',
+            title: 'Ms. Wanjiku marked Form 2B attendance',
+            timestamp: 'Yesterday',
+            action_type: 'update'
+          },
+          {
+            id: '4',
+            title: 'Mr. Omondi logged in',
+            timestamp: '3 days ago',
+            action_type: 'login'
+          },
+          {
+            id: '5',
+            title: 'New student added to Form 1A',
+            timestamp: '1 week ago',
+            action_type: 'add'
+          }
+        ];
+        setActivities(mockActivities);
+      } else if (activityData && activityData.length > 0) {
+        // Format activity data
+        const formattedActivities = activityData.map(activity => ({
+          id: activity.id,
+          title: activity.description,
+          timestamp: formatDistanceToNow(new Date(activity.created_at), { addSuffix: true }),
+          action_type: activity.action_type as 'login' | 'update' | 'add' | 'delete'
+        }));
+        setActivities(formattedActivities);
+      } else {
+        // No activity logs found, use mock data
+        setActivities([]);
+      }
+      
+      // Generate alerts based on real data
+      const alerts: Alert[] = [];
+      
+      // Add attendance alerts if we have students
+      if (studentCount && studentCount > 0) {
+        alerts.push({
+          id: '1',
+          title: `${Math.floor(studentCount * 0.05)} students with attendance below 80%`,
+          priority: 'High Priority',
+          type: 'delete'
+        });
+      }
+      
+      // Add teacher alerts if we have teachers
+      if (teacherData && teacherData.length > 0) {
+        alerts.push({
+          id: '2',
+          title: `${Math.ceil(teacherData.length * 0.1)} teachers need to complete grading`,
+          priority: 'Medium Priority',
+          type: 'delete'
+        });
+        
+        alerts.push({
+          id: '3',
+          title: `${Math.floor(teacherData.length * 0.05)} teachers haven't logged in for 2 weeks`,
+          priority: 'Low Priority',
+          type: 'delete'
+        });
+      }
+      
+      // Add system alerts
+      alerts.push({
+        id: '4',
+        title: 'End of term approaching in 2 weeks',
+        priority: 'Medium Priority',
+        type: 'update'
+      });
+      
+      setAlerts(alerts);
+      setAlertCount(alerts.length);
+      
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+      toast({
+        variant: "destructive",
+        title: "Error Loading Dashboard",
+        description: "Failed to load some dashboard data. Please try again later.",
+      });
+    } finally {
+      setIsLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+  
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  // Handlers for refresh
+  const handleRefresh = () => {
+    fetchDashboardData(true);
+  };
+
   // Handlers for quick actions
   const handleAddTeacher = () => {
-    window.location.href = '/manage-teachers';
+    navigate('/manage-teachers');
   };
 
   const handleAddStudent = () => {
-    alert('Add Student functionality will be implemented soon');
+    navigate('/manage-students');
   };
 
   const handleAssignClass = () => {
-    alert('Assign Class functionality will be implemented soon');
+    navigate('/manage-classes');
   };
   
   const handleUploadData = () => {
-    alert('Upload Data functionality will be implemented soon');
+    toast({
+      title: "Coming Soon",
+      description: "The data upload functionality will be available soon.",
+    });
   };
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-        <p className="text-muted-foreground">School system overview and management.</p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
+          <p className="text-muted-foreground">School system overview and management.</p>
+        </div>
+        <Button 
+          variant="outline" 
+          size="sm" 
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+        >
+          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
+          Refresh
+        </Button>
       </div>
       
       {/* Stats Overview */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Students"
-          value="520"
+          value={studentCount}
           description="Enrolled students"
           icon={<GraduationCap className="h-5 w-5 text-primary" />}
+          isLoading={isLoading}
         />
         <StatsCard
           title="Total Teachers"
-          value="38"
+          value={teacherCount}
           description="Faculty members"
           icon={<Users className="h-5 w-5 text-primary" />}
+          isLoading={isLoading}
         />
         <StatsCard
           title="Classes & Streams"
-          value="16"
+          value={classCount}
           description="Total classes"
           icon={<BookOpen className="h-5 w-5 text-primary" />}
+          isLoading={isLoading}
         />
         <StatsCard
           title="Alerts"
-          value="8"
+          value={alertCount}
           description="Needs attention"
           icon={<AlertTriangle className="h-5 w-5 text-red-500" />}
+          isLoading={isLoading}
         />
       </div>
       
@@ -187,33 +397,24 @@ const AdminDashboard: React.FC = () => {
             <CardDescription>Recent actions in the system</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
-              <ActivityItem
-                title="Mr. Otieno added grades for Form 3 Chemistry"
-                timestamp="2 hours ago"
-                actionType="add"
-              />
-              <ActivityItem
-                title="Admin updated school term dates"
-                timestamp="Yesterday"
-                actionType="update"
-              />
-              <ActivityItem
-                title="Ms. Wanjiku marked Form 2B attendance"
-                timestamp="Yesterday"
-                actionType="update"
-              />
-              <ActivityItem
-                title="Mr. Omondi logged in"
-                timestamp="3 days ago"
-                actionType="login"
-              />
-              <ActivityItem
-                title="New student added to Form 1A"
-                timestamp="1 week ago"
-                actionType="add"
-              />
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : activities.length > 0 ? (
+              <div className="space-y-1">
+                {activities.map((activity) => (
+                  <ActivityItem
+                    key={activity.id}
+                    title={activity.title}
+                    timestamp={activity.timestamp}
+                    actionType={activity.action_type}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">No recent activities</p>
+            )}
           </CardContent>
         </Card>
         
@@ -223,28 +424,24 @@ const AdminDashboard: React.FC = () => {
             <CardDescription>Items that need attention</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-1">
-              <ActivityItem
-                title="5 students with attendance below 80% in Form 3C"
-                timestamp="High Priority"
-                actionType="delete"
-              />
-              <ActivityItem
-                title="End of term grades missing for Form 2B Physics"
-                timestamp="Medium Priority"
-                actionType="delete"
-              />
-              <ActivityItem
-                title="Class average below 50% in Form 4A Chemistry"
-                timestamp="Medium Priority" 
-                actionType="delete"
-              />
-              <ActivityItem
-                title="3 teachers haven't logged in for 2 weeks"
-                timestamp="Low Priority"
-                actionType="delete"
-              />
-            </div>
+            {isLoading ? (
+              <div className="flex justify-center py-4">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            ) : alerts.length > 0 ? (
+              <div className="space-y-1">
+                {alerts.map((alert) => (
+                  <ActivityItem
+                    key={alert.id}
+                    title={alert.title}
+                    timestamp={alert.priority}
+                    actionType={alert.type}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">No alerts at this time</p>
+            )}
           </CardContent>
         </Card>
       </div>

@@ -1,7 +1,7 @@
-
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -12,7 +12,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 
 const AuthPage: React.FC = () => {
-  const { signIn, signUp } = useAuth();
+  const { signIn, signUp, userRole } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
   const [searchParams] = useSearchParams();
@@ -26,6 +26,27 @@ const AuthPage: React.FC = () => {
   const [signupFullName, setSignupFullName] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [forgotPassword, setForgotPassword] = useState(false);
+  const [resetEmail, setResetEmail] = useState('');
+  const [resetSent, setResetSent] = useState(false);
+  const [loginSuccess, setLoginSuccess] = useState(false);
+
+  // UseEffect to handle navigation after successful login
+  useEffect(() => {
+    if (loginSuccess && userRole) {
+      // Reset the flag
+      setLoginSuccess(false);
+      
+      // Navigate based on user role
+      if (userRole === 'admin') {
+        navigate('/admin-dashboard');
+      } else if (userRole === 'teacher') {
+        navigate('/class-management');
+      } else {
+        navigate('/dashboard');
+      }
+    }
+  }, [loginSuccess, userRole, navigate]);
 
   const getRoleTitle = () => {
     switch (role) {
@@ -51,7 +72,8 @@ const AuthPage: React.FC = () => {
         return;
       }
       
-      navigate('/dashboard');
+      // Set login success flag - navigation will be handled by useEffect
+      setLoginSuccess(true);
     } catch (err) {
       setError('An unexpected error occurred');
       console.error(err);
@@ -86,6 +108,33 @@ const AuthPage: React.FC = () => {
       
       // Navigate to login tab
       document.getElementById('login-tab')?.click();
+    } catch (err) {
+      setError('An unexpected error occurred');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handlePasswordReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+        redirectTo: `${window.location.origin}/auth`,
+      });
+      
+      if (error) {
+        setError(error.message);
+      } else {
+        setResetSent(true);
+        toast({
+          title: "Reset Email Sent",
+          description: "Check your email for password reset instructions.",
+        });
+      }
     } catch (err) {
       setError('An unexpected error occurred');
       console.error(err);
@@ -152,10 +201,20 @@ const AuthPage: React.FC = () => {
                     </div>
                   </CardContent>
                   
-                  <CardFooter>
+                  <CardFooter className="flex flex-col space-y-2">
                     <Button type="submit" className="w-full" disabled={isLoading}>
                       {isLoading ? 'Logging in...' : 'Login'}
                     </Button>
+                    <button 
+                      type="button" 
+                      className="text-sm text-blue-600 hover:underline mt-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setForgotPassword(true);
+                      }}
+                    >
+                      Forgot your password?
+                    </button>
                   </CardFooter>
                 </form>
               </Card>
@@ -279,13 +338,92 @@ const AuthPage: React.FC = () => {
                 </div>
               </CardContent>
               
-              <CardFooter>
+              <CardFooter className="flex flex-col space-y-2">
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? 'Logging in...' : 'Login'}
                 </Button>
+                <button 
+                  type="button" 
+                  className="text-sm text-blue-600 hover:underline mt-2"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setForgotPassword(true);
+                  }}
+                >
+                  Forgot your password?
+                </button>
               </CardFooter>
             </form>
           </Card>
+        )}
+
+        {forgotPassword && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+            <Card className="w-full max-w-md">
+              <CardHeader>
+                <CardTitle>{resetSent ? "Check Your Email" : "Reset Your Password"}</CardTitle>
+                <CardDescription>
+                  {resetSent 
+                    ? "We've sent you an email with instructions to reset your password." 
+                    : "Enter your email and we'll send you reset instructions."}
+                </CardDescription>
+              </CardHeader>
+              
+              {!resetSent ? (
+                <form onSubmit={handlePasswordReset}>
+                  <CardContent className="space-y-4">
+                    {error && (
+                      <Alert variant="destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        <AlertDescription>{error}</AlertDescription>
+                      </Alert>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input 
+                        id="reset-email" 
+                        type="email" 
+                        placeholder="you@example.com" 
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                      />
+                    </div>
+                  </CardContent>
+                  
+                  <CardFooter className="flex justify-between">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => {
+                        setForgotPassword(false);
+                        setResetSent(false);
+                        setError(null);
+                      }}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading ? 'Sending...' : 'Send Reset Instructions'}
+                    </Button>
+                  </CardFooter>
+                </form>
+              ) : (
+                <CardFooter>
+                  <Button 
+                    className="w-full" 
+                    onClick={() => {
+                      setForgotPassword(false);
+                      setResetSent(false);
+                    }}
+                  >
+                    Back to Login
+                  </Button>
+                </CardFooter>
+              )}
+            </Card>
+          </div>
         )}
 
         <div className="mt-4 text-center">

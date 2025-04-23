@@ -13,7 +13,7 @@ type AuthContextType = {
   profile: UserProfile | null;
   userRole: UserRole | null;
   isLoading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ user: User | null; role: UserRole | null; error: any }>;
   signUp: (email: string, password: string, fullName: string, role: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
 };
@@ -74,8 +74,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       setProfile(data);
       setUserRole(data.role);
+      return data;
     } catch (error) {
       console.error('Error fetching user profile:', error);
+      return null;
     }
   };
 
@@ -83,19 +85,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       
-      // Log the login activity if successful
-      if (!error && data.user) {
-        try {
-          await logLogin(data.user.id, email);
-        } catch (logError) {
-          console.error('Failed to log login activity:', logError);
-          // Don't block authentication if logging fails
-        }
+      if (error) {
+        return { user: null, role: null, error };
+      }
+
+      // Get user profile and role
+      const profile = await fetchUserProfile(data.user.id);
+      
+      // Log the login activity
+      try {
+        await logLogin(data.user.id, email);
+      } catch (logError) {
+        console.error('Failed to log login activity:', logError);
+        // Don't block authentication if logging fails
       }
       
-      return { error };
+      return { 
+        user: data.user, 
+        role: profile?.role || null,
+        error: null 
+      };
     } catch (error) {
-      return { error };
+      return { user: null, role: null, error };
     }
   };
 

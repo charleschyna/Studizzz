@@ -3,11 +3,11 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import MainLayout from "./components/layouts/MainLayout";
 import ProtectedRoute from "./components/ProtectedRoute";
-import AuthPage from "./pages/AuthPage";
+import Auth from "./pages/Auth";
 import Dashboard from "./pages/Dashboard";
 import NotFound from "./pages/NotFound";
 import Index from "./pages/Index";
@@ -23,6 +23,7 @@ import AcademicRecords from '@/pages/admin/AcademicRecords';
 import AttendanceRecords from '@/pages/admin/AttendanceRecords';
 import AnalyticsReports from '@/pages/admin/AnalyticsReports';
 import SystemSettings from '@/pages/admin/SystemSettings';
+import ActivityLogs from '@/pages/admin/ActivityLogs';
 
 // Teacher pages
 import ClassManagement from "./pages/teacher/ClassManagement";
@@ -48,13 +49,11 @@ const App = () => {
             <Sonner />
             <BrowserRouter>
               <Routes>
-                {/* Index Route */}
+                {/* Public Routes */}
                 <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
                 
-                {/* Auth Route */}
-                <Route path="/auth" element={<AuthPage />} />
-                
-                {/* Protected Routes */}
+                {/* Dashboard Route - Redirects based on role */}
                 <Route path="/dashboard" element={
                   <ProtectedRoute>
                     <MainLayout>
@@ -63,93 +62,19 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
-                {/* Parent Dashboard Routes */}
-                <Route path="/performance" element={
-                  <ProtectedRoute allowedRoles={['parent', 'admin']}>
-                    <MainLayout>
-                      <Performance />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/attendance" element={
-                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
-                    <MainLayout>
-                      <Attendance />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/report-cards" element={
-                  <ProtectedRoute allowedRoles={['parent', 'admin']}>
-                    <MainLayout>
-                      <ReportCards />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/notifications" element={
-                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
-                    <MainLayout>
-                      <Notifications />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/student-profile" element={
-                  <ProtectedRoute allowedRoles={['parent', 'admin']}>
-                    <MainLayout>
-                      <StudentProfile />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/settings" element={
-                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
-                    <MainLayout>
-                      <Settings />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/student-fees" element={
-                  <ProtectedRoute allowedRoles={['parent']}>
-                    <MainLayout>
-                      <StudentFees />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                {/* Teacher Dashboard Routes */}
-                <Route path="/class-management" element={
-                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                    <MainLayout>
-                      <ClassManagement />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/grade-entry" element={
-                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                    <MainLayout>
-                      <GradeEntry />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                {/* Admin Dashboard Routes */}
-                <Route path="/manage-teachers" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout>
-                      <ManageTeachers />
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
+                {/* Admin Routes */}
                 <Route path="/admin-dashboard" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
                       <AdminDashboard />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/manage-teachers" element={
+                  <ProtectedRoute allowedRoles={['admin']}>
+                    <MainLayout>
+                      <ManageTeachers />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
@@ -202,7 +127,7 @@ const App = () => {
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/analytics" element={
+                <Route path="/analytics-reports" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
                       <AnalyticsReports />
@@ -221,116 +146,86 @@ const App = () => {
                 <Route path="/activity-logs" element={
                   <ProtectedRoute allowedRoles={['admin']}>
                     <MainLayout>
-                      <div className="p-4">Activity Logs (Coming Soon)</div>
+                      <ActivityLogs />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/account-settings" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                {/* Teacher Routes */}
+                <Route path="/class-management" element={
+                  <ProtectedRoute allowedRoles={['teacher']}>
                     <MainLayout>
-                      <div className="p-4">Account Settings (Coming Soon)</div>
+                      <ClassManagement />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
                 
-                {/* Placeholder routes - will be implemented later */}
-                <Route path="/students" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
+                <Route path="/grade-entry" element={
+                  <ProtectedRoute allowedRoles={['teacher']}>
                     <MainLayout>
-                      <div className="p-4">Students Management (Coming Soon)</div>
+                      <GradeEntry />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
                 
-                <Route path="/teachers" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout>
-                      <div className="p-4">Teachers Management (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/parents" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout>
-                      <div className="p-4">Parents Management (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/classes" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout>
-                      <div className="p-4">Classes Management (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/subjects" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout>
-                      <div className="p-4">Subjects Management (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/terms" element={
-                  <ProtectedRoute allowedRoles={['admin']}>
-                    <MainLayout>
-                      <div className="p-4">Terms Management (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/grades" element={
-                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
-                    <MainLayout>
-                      <div className="p-4">Grades Management (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/reports" element={
-                  <ProtectedRoute allowedRoles={['admin', 'teacher', 'parent']}>
-                    <MainLayout>
-                      <div className="p-4">Reports (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/performance-analytics" element={
-                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                    <MainLayout>
-                      <div className="p-4">Performance Analytics (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/student-profiles" element={
-                  <ProtectedRoute allowedRoles={['teacher', 'admin']}>
-                    <MainLayout>
-                      <div className="p-4">Student Profiles (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/messages" element={
-                  <ProtectedRoute allowedRoles={['teacher', 'admin', 'parent']}>
-                    <MainLayout>
-                      <div className="p-4">Messages & Announcements (Coming Soon)</div>
-                    </MainLayout>
-                  </ProtectedRoute>
-                } />
-                
-                <Route path="/my-children" element={
+                {/* Parent Routes */}
+                <Route path="/performance" element={
                   <ProtectedRoute allowedRoles={['parent']}>
                     <MainLayout>
-                      <div className="p-4">My Children (Coming Soon)</div>
+                      <Performance />
                     </MainLayout>
                   </ProtectedRoute>
                 } />
                 
+                <Route path="/attendance" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <Attendance />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/report-cards" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <ReportCards />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/notifications" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <Notifications />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/student-profile" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <StudentProfile />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/settings" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <Settings />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/student-fees" element={
+                  <ProtectedRoute allowedRoles={['parent']}>
+                    <MainLayout>
+                      <StudentFees />
+                    </MainLayout>
+                  </ProtectedRoute>
+                } />
+
+                {/* Catch-all route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>

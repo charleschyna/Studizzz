@@ -11,7 +11,10 @@ import {
   UserPlus,
   Book,
   Loader2,
-  RefreshCw
+  RefreshCw,
+  User,
+  UserCircle,
+  School
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -118,6 +121,11 @@ interface Alert {
   type: 'login' | 'update' | 'add' | 'delete';
 }
 
+interface ClassStats {
+  grade_level: number;
+  count: number;
+}
+
 const AdminDashboard: React.FC = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -131,6 +139,9 @@ const AdminDashboard: React.FC = () => {
   const [alertCount, setAlertCount] = useState<number>(0);
   const [activities, setActivities] = useState<ActivityLog[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [maleCount, setMaleCount] = useState<number>(0);
+  const [femaleCount, setFemaleCount] = useState<number>(0);
+  const [classStats, setClassStats] = useState<ClassStats[]>([]);
 
   // Function to fetch dashboard data
   const fetchDashboardData = async (showRefreshIndicator = false) => {
@@ -148,6 +159,43 @@ const AdminDashboard: React.FC = () => {
         
       if (studentError) throw studentError;
       setStudentCount(studentCount || 0);
+      
+      // Fetch gender counts
+      const { data: maleData, error: maleError } = await supabase
+        .from('students')
+        .select('*', { count: 'exact', head: true })
+        .eq('gender', 'male');
+      
+      const { data: femaleData, error: femaleError } = await supabase
+        .from('students')
+        .select('*', { count: 'exact', head: true })
+        .eq('gender', 'female');
+        
+      if (maleError) throw maleError;
+      if (femaleError) throw femaleError;
+      
+      setMaleCount(maleData?.length || 0);
+      setFemaleCount(femaleData?.length || 0);
+      
+      // Fetch class statistics
+      const { data: classData, error: classStatsError } = await supabase
+        .from('students')
+        .select('class_id, classes!inner(grade_level)')
+        .not('class_id', 'is', null);
+        
+      if (classStatsError) throw classStatsError;
+      
+      // Process class statistics
+      const stats = classData?.reduce((acc: { [key: number]: number }, curr) => {
+        const gradeLevel = (curr.classes as any).grade_level;
+        acc[gradeLevel] = (acc[gradeLevel] || 0) + 1;
+        return acc;
+      }, {});
+      
+      setClassStats(Object.entries(stats || {}).map(([grade, count]) => ({
+        grade_level: parseInt(grade),
+        count: count as number
+      })));
       
       // Fetch teacher count
       const { data: teacherData, error: teacherError } = await supabase
@@ -175,7 +223,7 @@ const AdminDashboard: React.FC = () => {
         
       if (activityError) {
         console.error('Error fetching activity logs:', activityError);
-        // If activity logs table doesn't exist yet, use mock data
+        // Mock data for activity logs
         const mockActivities: ActivityLog[] = [
           {
             id: '1',
@@ -200,252 +248,178 @@ const AdminDashboard: React.FC = () => {
             title: 'Mr. Omondi logged in',
             timestamp: '3 days ago',
             action_type: 'login'
-          },
-          {
-            id: '5',
-            title: 'New student added to Form 1A',
-            timestamp: '1 week ago',
-            action_type: 'add'
           }
         ];
         setActivities(mockActivities);
-      } else if (activityData && activityData.length > 0) {
-        // Format activity data
-        const formattedActivities = activityData.map(activity => ({
-          id: activity.id,
-          title: activity.description,
-          timestamp: formatDistanceToNow(new Date(activity.created_at), { addSuffix: true }),
-          action_type: activity.action_type as 'login' | 'update' | 'add' | 'delete'
-        }));
-        setActivities(formattedActivities);
       } else {
-        // No activity logs found, use mock data
-        setActivities([]);
+        setActivities(
+          activityData?.map((log) => ({
+            id: log.id,
+            title: log.description,
+            timestamp: formatDistanceToNow(new Date(log.created_at), { addSuffix: true }),
+            action_type: log.action_type
+          })) || []
+        );
       }
-      
-      // Generate alerts based on real data
-      const alerts: Alert[] = [];
-      
-      // Add attendance alerts if we have students
-      if (studentCount && studentCount > 0) {
-        alerts.push({
-          id: '1',
-          title: `${Math.floor(studentCount * 0.05)} students with attendance below 80%`,
-          priority: 'High Priority',
-          type: 'delete'
-        });
-      }
-      
-      // Add teacher alerts if we have teachers
-      if (teacherData && teacherData.length > 0) {
-        alerts.push({
-          id: '2',
-          title: `${Math.ceil(teacherData.length * 0.1)} teachers need to complete grading`,
-          priority: 'Medium Priority',
-          type: 'delete'
-        });
-        
-        alerts.push({
-          id: '3',
-          title: `${Math.floor(teacherData.length * 0.05)} teachers haven't logged in for 2 weeks`,
-          priority: 'Low Priority',
-          type: 'delete'
-        });
-      }
-      
-      // Add system alerts
-      alerts.push({
-        id: '4',
-        title: 'End of term approaching in 2 weeks',
-        priority: 'Medium Priority',
-        type: 'update'
-      });
-      
-      setAlerts(alerts);
-      setAlertCount(alerts.length);
-      
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
       toast({
-        variant: "destructive",
-        title: "Error Loading Dashboard",
-        description: "Failed to load some dashboard data. Please try again later.",
+        title: 'Error',
+        description: 'Failed to fetch dashboard data',
+        variant: 'destructive',
       });
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
     }
   };
-  
-  // Fetch data on component mount
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
-  // Handlers for refresh
   const handleRefresh = () => {
     fetchDashboardData(true);
   };
 
-  // Handlers for quick actions
-  const handleAddTeacher = () => {
-    navigate('/manage-teachers');
-  };
-
-  const handleAddStudent = () => {
-    navigate('/manage-students');
-  };
-
-  const handleAssignClass = () => {
-    navigate('/manage-classes');
-  };
-  
-  const handleUploadData = () => {
-    toast({
-      title: "Coming Soon",
-      description: "The data upload functionality will be available soon.",
-    });
+  const navigateToSection = (path: string) => {
+    navigate(path);
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
+    <>
+      <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-          <p className="text-muted-foreground">School system overview and management.</p>
+          <p className="text-muted-foreground">Monitor and manage school activities</p>
         </div>
-        <Button 
-          variant="outline" 
-          size="sm" 
+        <Button
+          variant="outline"
+          size="icon"
           onClick={handleRefresh}
           disabled={isRefreshing}
         >
-          <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-          Refresh
+          <RefreshCw className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
         </Button>
       </div>
-      
-      {/* Stats Overview */}
+
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Students"
           value={studentCount}
-          description="Enrolled students"
+          description="Currently enrolled"
           icon={<GraduationCap className="h-5 w-5 text-primary" />}
+          isLoading={isLoading}
+        />
+        <StatsCard
+          title="Male Students"
+          value={maleCount}
+          description={`${((maleCount / studentCount) * 100).toFixed(1)}% of total`}
+          icon={<User className="h-5 w-5 text-blue-500" />}
+          isLoading={isLoading}
+        />
+        <StatsCard
+          title="Female Students"
+          value={femaleCount}
+          description={`${((femaleCount / studentCount) * 100).toFixed(1)}% of total`}
+          icon={<UserCircle className="h-5 w-5 text-pink-500" />}
           isLoading={isLoading}
         />
         <StatsCard
           title="Total Teachers"
           value={teacherCount}
-          description="Faculty members"
+          description="Active faculty members"
           icon={<Users className="h-5 w-5 text-primary" />}
           isLoading={isLoading}
         />
-        <StatsCard
-          title="Classes & Streams"
-          value={classCount}
-          description="Total classes"
-          icon={<BookOpen className="h-5 w-5 text-primary" />}
-          isLoading={isLoading}
-        />
-        <StatsCard
-          title="Alerts"
-          value={alertCount}
-          description="Needs attention"
-          icon={<AlertTriangle className="h-5 w-5 text-red-500" />}
-          isLoading={isLoading}
-        />
       </div>
-      
-      {/* Quick Actions */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Quick Actions</CardTitle>
-          <CardDescription>Frequently used operations</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <QuickAction
-              icon={<UserPlus className="h-5 w-5" />}
-              label="Add Teacher"
-              onClick={handleAddTeacher}
-            />
-            <QuickAction
-              icon={<GraduationCap className="h-5 w-5" />}
-              label="Add Student"
-              onClick={handleAddStudent}
-            />
-            <QuickAction
-              icon={<Book className="h-5 w-5" />}
-              label="Assign Class"
-              onClick={handleAssignClass}
-            />
-            <QuickAction
-              icon={<FileText className="h-5 w-5" />}
-              label="Upload Data"
-              onClick={handleUploadData}
-            />
-          </div>
-        </CardContent>
-      </Card>
-      
-      {/* Activity Logs */}
+
       <div className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
-            <CardTitle>System Activity</CardTitle>
-            <CardDescription>Recent actions in the system</CardDescription>
+            <CardTitle>Students per Form</CardTitle>
+            <CardDescription>Distribution across grade levels</CardDescription>
           </CardHeader>
           <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : activities.length > 0 ? (
-              <div className="space-y-1">
-                {activities.map((activity) => (
+            <div className="space-y-4">
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                classStats
+                  .sort((a, b) => a.grade_level - b.grade_level)
+                  .map((stat) => (
+                    <div key={stat.grade_level} className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <School className="h-4 w-4 text-primary mr-2" />
+                        <span className="text-sm font-medium">Form {stat.grade_level}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <span className="text-sm font-bold">{stat.count}</span>
+                        <span className="text-xs text-muted-foreground ml-2">
+                          ({((stat.count / studentCount) * 100).toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                  ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>Recent Activity</CardTitle>
+            <CardDescription>Latest actions in the system</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {isLoading ? (
+                <div className="flex justify-center">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+                </div>
+              ) : (
+                activities.map((activity) => (
                   <ActivityItem
                     key={activity.id}
                     title={activity.title}
                     timestamp={activity.timestamp}
                     actionType={activity.action_type}
                   />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-4">No recent activities</p>
-            )}
-          </CardContent>
-        </Card>
-        
-        <Card>
-          <CardHeader>
-            <CardTitle>Alerts</CardTitle>
-            <CardDescription>Items that need attention</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <div className="flex justify-center py-4">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
-              </div>
-            ) : alerts.length > 0 ? (
-              <div className="space-y-1">
-                {alerts.map((alert) => (
-                  <ActivityItem
-                    key={alert.id}
-                    title={alert.title}
-                    timestamp={alert.priority}
-                    actionType={alert.type}
-                  />
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-muted-foreground py-4">No alerts at this time</p>
-            )}
+                ))
+              )}
+            </div>
           </CardContent>
         </Card>
       </div>
-    </div>
+
+      <div className="mt-6">
+        <h2 className="text-lg font-semibold mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <QuickAction
+            icon={<UserPlus className="h-5 w-5" />}
+            label="Add Student"
+            onClick={() => navigateToSection('/students/new')}
+          />
+          <QuickAction
+            icon={<Users className="h-5 w-5" />}
+            label="Add Teacher"
+            onClick={() => navigateToSection('/teachers/new')}
+          />
+          <QuickAction
+            icon={<Book className="h-5 w-5" />}
+            label="Manage Classes"
+            onClick={() => navigateToSection('/classes')}
+          />
+          <QuickAction
+            icon={<Activity className="h-5 w-5" />}
+            label="View Reports"
+            onClick={() => navigateToSection('/reports')}
+          />
+        </div>
+      </div>
+    </>
   );
 };
 

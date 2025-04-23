@@ -24,14 +24,18 @@ import {
   ClipboardList,
   Wrench,
   LogIn,
-  Wallet
+  Wallet,
+  Menu,
+  X
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
   isOpen: boolean;
+  onToggle: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, onToggle }) => {
   const { userRole } = useAuth();
 
   // Define routes based on user role
@@ -48,10 +52,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
         { name: 'Fees & Payments', path: '/fees-management', icon: <Wallet className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Academic Records', path: '/academic-records', icon: <FileText className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'Attendance Records', path: '/attendance-records', icon: <Calendar className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Analytics & Reports', path: '/analytics', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['admin'] },
+        { name: 'Analytics & Reports', path: '/analytics-reports', icon: <BarChart className="h-5 w-5" />, allowedRoles: ['admin'] },
         { name: 'System Settings', path: '/system-settings', icon: <Wrench className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Activity Logs', path: '/activity-logs', icon: <Activity className="h-5 w-5" />, allowedRoles: ['admin'] },
-        { name: 'Account Settings', path: '/account-settings', icon: <LogIn className="h-5 w-5" />, allowedRoles: ['admin'] }
+        { name: 'Activity Logs', path: '/activity-logs', icon: <Activity className="h-5 w-5" />, allowedRoles: ['admin'] }
       );
     }
     
@@ -84,12 +87,22 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
 
   return (
     <div className={cn(
-      "fixed md:relative md:flex flex-col w-64 bg-gradient-to-b from-indigo-800 to-indigo-900 text-white shadow-xl transition-transform duration-300 ease-in-out transform h-full z-50",
+      "fixed md:relative md:flex flex-col w-64 bg-gradient-to-b from-sky-50 to-blue-100 text-slate-800 shadow-lg transition-transform duration-300 ease-in-out transform h-full z-50",
       isOpen ? "translate-x-0" : "-translate-x-full md:translate-x-0"
     )}>
-      <div className="p-6 border-b border-indigo-700">
-        <h2 className="text-2xl font-bold text-white">SPTS</h2>
-        <p className="text-sm text-indigo-200">Student Performance Tracking</p>
+      <div className="flex items-center justify-between p-6 border-b border-blue-200">
+        <div>
+          <h2 className="text-2xl font-bold text-blue-800">SPTS</h2>
+          <p className="text-sm text-blue-600">Student Performance Tracking</p>
+        </div>
+        <Button
+          variant="ghost"
+          size="icon"
+          className="text-blue-600 hover:bg-blue-100 md:hidden"
+          onClick={onToggle}
+        >
+          {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+        </Button>
       </div>
       
       <nav className="flex-1 overflow-y-auto">
@@ -101,8 +114,8 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen }) => {
                 className={({ isActive }) => 
                   `flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive 
-                      ? 'bg-indigo-700/50 text-white' 
-                      : 'text-indigo-100 hover:bg-indigo-700/30 hover:text-white'
+                      ? 'bg-blue-200/80 text-blue-800' 
+                      : 'text-slate-600 hover:bg-blue-100 hover:text-blue-800'
                   }`
                 }
               >
